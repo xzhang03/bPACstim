@@ -3,16 +3,16 @@ const byte ArmPin = 12;
 const byte LEDArm = 9;
 const byte LEDPIN1 = 3; // Pin 3: 1 sec, full power
 const byte LEDPIN2 = 4; // Pin 4: 2 sec, full power
-const byte LEDPIN3 = 5; // Pin 5: 4 sec, full power
+const byte LEDPIN3 = 5; // Pin 5: 100 ms, pwm
 const byte LEDPIN4 = 6; // Pin 6: 2 sec, pwm
-const byte LEDPIN5 = 9; // Pin 9: 100 ms, pwm
+// const byte LEDPIN5 = 9; // Pin 9: 100 ms, pwm
 const byte LEDrefractory = 13; // onboard LED to show when refractory is on
 
 const unsigned int LED1 = 1 * 1000; // Pin 3: 1 sec, full power
 const unsigned int LED2 = 2 * 1000; // Pin 4: 2 sec, full power
-const unsigned int LED3 = 4 * 1000; // Pin 5: 4 sec, full power
+const unsigned int LED3 = 100;      // Pin 5: 100 ms, pwm
 const unsigned int LED4 = 2 * 1000; // Pin 6: 2 sec, pwm
-const unsigned int LED5 = 100; // Pin 9: 100 ms, pwm
+// const unsigned int LED5 = 100; // Pin 9: 100 ms, pwm
 const unsigned int LEDr = 10 * 1000; // Minimal 10 second every trial
 
 // PWM
@@ -86,10 +86,10 @@ void loop() {
 
     // LED 3
     if ((tnow - ttrig) < LED3){
-      digitalWrite(LEDPIN3, LOW);
+      analogWrite(LEDPIN3, PWM);
     }
     else{
-      digitalWrite(LEDPIN3, HIGH);
+      analogWrite(LEDPIN3, 1023);
     }
 
     // LED 4
@@ -110,6 +110,7 @@ void loop() {
       analogWrite(LEDPIN4, 1023);
     }
 
+    /*
     // LED 5
     if ((tnow - ttrig) < LED5){
       analogWrite(LEDPIN5, PWM);
@@ -117,6 +118,7 @@ void loop() {
     else{
       analogWrite(LEDPIN5, 1023H);
     }
+    */
 
     // refractory
     
