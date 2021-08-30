@@ -45,7 +45,7 @@
 U8GLIB_NHD_C12864 u8g(13, 11, 10, 9, 8);    // SPI Com: SCK = 13, MOSI = 11, CS = 10, CD = 9, RST = 8
 
 // debug
-#define debug true
+#define debug false
 #define debugcheckcycle false
 
 // UI settings
@@ -60,8 +60,8 @@ U8GLIB_NHD_C12864 u8g(13, 11, 10, 9, 8);    // SPI Com: SCK = 13, MOSI = 11, CS 
 
 #define MENU_ITEMS 7
 #define num_items 6
-const char *menu_strings[MENU_ITEMS] = { "Pulse width (ms)", "Pulse cycle (ms)", "Pulses", "PMW", "Polarity", "Refractory (s)", "ARMED! HOLD TO START"};
-const char *trainon_strings[MENU_ITEMS] = { "Pulse width (ms)", "Pulse cycle (ms)", "Pulses left", "PMW", "Polarity", "Refractory (s)", "*TRAIN IS GOING*"};
+const char *menu_strings[MENU_ITEMS] = { "Pulse width (ms)", "Pulse cycle (ms)", "Pulses", "PWM", "Polarity", "Refractory (s)", "ARMED! HOLD TO START"};
+const char *trainon_strings[MENU_ITEMS] = { "Pulse width (ms)", "Pulse cycle (ms)", "Pulses left", "PWM", "Polarity", "Refractory (s)", "*TRAIN IS GOING*"};
 byte row_current = 0;
 bool column_select = false; // true = right side, false = left side
 bool menu_redraw_required = false;
@@ -222,7 +222,7 @@ void drawMenu(void) {
     }
     else{
       if((i == MENU_ITEMS - 1) && !arm){
-        u8g.drawStr(1, i*h, "UNARMED");
+        u8g.drawStr(1, i*h, "[UNARMED]");
       }
       else {
         u8g.drawStr(1, i*h, menu_strings[i]);
