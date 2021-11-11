@@ -2,9 +2,10 @@
 
 // const byte TriggerPin = 11;
 const byte ArmPin = 12;
-const byte LEDArm = 9;
+const byte LEDArm = 11;
 const byte LEDPIN1 = 5; // Pin 5: PWM
 const byte LEDPIN2 = 6; // Pin 6: digital
+const byte LEDPIN3 = 8; // Pin 8: digital unsigned
 const byte LEDonboard = 13; // onboard LED to show when Stim is on
 
 // PWM
@@ -15,6 +16,7 @@ bool pol = false;
 
 // logic
 bool arm = false;
+bool softarm = false; // Software arm (dangerous)
 
 // Train
 // [          0,           1,        2,   3,        4,          5]
@@ -51,6 +53,7 @@ void setup() {
   pinMode(LEDArm, OUTPUT);
   pinMode(LEDPIN1, OUTPUT);
   pinMode(LEDPIN2, OUTPUT);
+  pinMode(LEDPIN3, OUTPUT);
   pinMode(trainon2_ch, OUTPUT);
 
   Wire.begin(4);                // join i2c bus with address #4
@@ -67,7 +70,7 @@ void setup() {
 void loop() {
   
   // Arming
-  if (digitalRead(ArmPin) == LOW){
+  if ((digitalRead(ArmPin) == LOW) || softarm){
     arm = true;
     analogWrite(LEDArm,50);
   }
@@ -169,6 +172,21 @@ void receiveEvent(int howMany){
       else{
         lockpolarity = true;
       }
+      break;
+
+    case 11:
+      // soft arm
+      if (o == 10){
+        softarm = true;
+      }
+      break;
+
+    case 12:
+      // soft unarm
+      if (o == 10){
+        softarm = false;
+      }
+      break;
   }
 }
 
@@ -259,6 +277,16 @@ void requestEvent() {
       // polarity lock toggle
       Wire.write(o);
       break;
+
+    case 11:
+      // softarm
+      Wire.write(o);
+      break;
+
+    case 12:
+      // soft unarm
+      Wire.write(o);
+      break;
       
     
   }
@@ -271,12 +299,14 @@ void resetpol(){
     // Positive pol
     analogWrite(LEDPIN1, 0);
     digitalWrite(LEDPIN2, LOW);
+    digitalWrite(LEDPIN3, LOW);
     digitalWrite(LEDonboard, LOW);
   }
   else{
     // Negative pol
     analogWrite(LEDPIN1, 255);
     digitalWrite(LEDPIN2, HIGH);
+    digitalWrite(LEDPIN3, LOW);
     digitalWrite(LEDonboard, HIGH);
   }
 }
@@ -302,6 +332,7 @@ void dotrain(void){
     // led on
     pulseon = true;
     analogWrite(LEDPIN1, pwm);
+    digitalWrite(LEDPIN3, HIGH);
     if (pol){
       digitalWrite(LEDPIN2, HIGH);
       digitalWrite(LEDonboard, HIGH);

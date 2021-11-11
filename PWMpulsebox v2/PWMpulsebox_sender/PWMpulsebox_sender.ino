@@ -77,7 +77,7 @@ unsigned int numsrem[num_items]; // [Pulse width, Pulse cycle, N pulses, PWM, Po
 unsigned long refractory = 5*1000;
 bool trainon = false;
 bool startbuttondown = false;
-const int maxpwm = 250;
+const int maxpwm = 255;
 bool arm = false;
 
 // Initializing
@@ -106,7 +106,7 @@ bool synci2c = false;
 
 // safety
 bool lockpolarity = true;
-
+bool softarm = false;
 
 void initialdraw(void) {
   byte h;
@@ -580,16 +580,29 @@ void setup() {
   // Polarity lock the trinket
   if (lockpolarity){
     // lock
+    p = 0;
     m = 10;
     o = 9;
   }
   else{
     // unlock
+    p = 0;
     m = 10;
     o = 10;
   }
   while (p != o){
     // make sure lock is tight
+    i2csend();
+  }
+
+  // Soft arm
+  if (softarm){
+    p = 0;
+    m = 11;
+    o = 10;
+  }
+  while (p != o){
+    // make sure arm is done right
     i2csend();
   }
   
