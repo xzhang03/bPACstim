@@ -60,6 +60,8 @@ U8GLIB_NHD_C12864 u8g(13, 11, 10, 9, 8);    // SPI Com: SCK = 13, MOSI = 11, CS 
 
 #define MENU_ITEMS 7
 #define num_items 6
+
+#define finemode true // finemode uses a modifier of 10 (10-2550 ms). Set finemode to false to enable a modifier of 100 (100-25500 ms);
 const char *menu_strings[MENU_ITEMS] = { "Pulse width (ms)", "Pulse cycle (ms)", "Pulses", "PWM", "Polarity", "Refractory (s)", "ARMED! HOLD TO START"};
 const char *trainon_strings[MENU_ITEMS] = { "Pulse width (ms)", "Pulse cycle (ms)", "Pulses left", "PWM", "Polarity", "Refractory (s)", "*TRAIN IS GOING*"};
 byte row_current = 0;
@@ -70,9 +72,11 @@ byte i; // indexing
 
 // Train settings
 unsigned int nums[num_items] = {200, 500, 5, 0, 0, 5}; // [Pulse width, Pulse cycle, N pulses, PWM, Polarity, refractory]
-const int numdiffs[num_items] = {100, 100, 1, 20, 1, 1};
-const int numdiffs2[num_items] = {500, 500, 5, 5, 0, 10};
-const int numdiffthresh[num_items] = {500, 500, 20, 100, 1, 20};
+const int numdiffs[num_items] = {100, 100, 1, 20, 1, 1}; // intermediate
+const int numdiffs2[num_items] = {500, 500, 5, 5, 0, 10}; // large
+const int numdiffs0[num_items] = {10, 10, 0, 0, 0, 0}; // fine (only for times)
+const int numdiffthresh[num_items] = {500, 500, 20, 100, 1, 20}; // Going down: num > threshold, go down as numdiffs2; Going up: num >= threshold, go up as numdiffs2.
+const int numdiffthresh0[num_items] = {100, 100, 0, 0, 0, 0}; // Going down: num <= threshold0, go down as numdiffs0; Going up: num < threshold0, go up as numdiffs0.
 unsigned int numsrem[num_items]; // [Pulse width, Pulse cycle, N pulses, PWM, Polarity, refractory]
 unsigned long refractory = 5*1000;
 bool trainon = false;
@@ -103,6 +107,9 @@ byte p = 0; // receive
 byte i2csendbuf[3]; //
 bool sendi2c = false;
 bool synci2c = false;
+const byte trainmod1 = 100; // Coarse mode 100-25500 ms
+const byte trainmod2 = 10; // Fine mode 10-2550 ms
+byte trainmod;
 
 // safety
 bool lockpolarity = true;
@@ -339,10 +346,16 @@ void updateMenu(void) {
           return;
         }
 
-        if ((nums[row_current] >= numdiffs[row_current]) && (nums[row_current] <= numdiffthresh[row_current])){
+        if ((nums[row_current] >= numdiffs0[row_current]) && (nums[row_current] <= numdiffthresh0[row_current]) && finemode){
+          // only if number >= increment0 and number <= threshold0 and finemode, does the number go down as numdiffs0 (fine)
+          nums[row_current] = nums[row_current] - numdiffs0[row_current];
+        }
+        else if ((nums[row_current] >= numdiffs[row_current]) && (nums[row_current] <= numdiffthresh[row_current])){
+          // only if number >= increment and number <= threshold and number > threshold0, does the number go down as numdiffs (intermediate)
           nums[row_current] = nums[row_current] - numdiffs[row_current];
         }
         else if (nums[row_current] > numdiffs[row_current]){
+          // if number > increment and number > threshold, does the number go down as numdiffs2 (large)
           nums[row_current] = nums[row_current] - numdiffs2[row_current];
         }
         
@@ -350,9 +363,9 @@ void updateMenu(void) {
         m = 3;
         n = row_current;
         if (n <= 1){
-          o = nums[row_current] / 100;
+          o = nums[row_current] / trainmod;
           i2csend();
-          nums[row_current] = p * 100;
+          nums[row_current] = p * trainmod;
         }
         else{
           o = nums[row_current];
@@ -380,11 +393,17 @@ void updateMenu(void) {
           // polarity is locked
           return;
         }
-        
-        if (nums[row_current] < numdiffthresh[row_current]){
+
+        if ((nums[row_current] < numdiffthresh0[row_current]) && finemode){
+          // If number < threshold0 and finemode, go up as numdiffs0 (fine)
+          nums[row_current] = nums[row_current] + numdiffs0[row_current];
+        }
+        else if (nums[row_current] < numdiffthresh[row_current]){
+          // If number < thresh and number >= threshold0, go up as numdiffs (intermediate)
           nums[row_current] = nums[row_current] + numdiffs[row_current];
         }
         else{
+          // if number >= thresh go up as numdiffs2 (large)
           nums[row_current] = nums[row_current] + numdiffs2[row_current];
         }
 
@@ -392,9 +411,9 @@ void updateMenu(void) {
         m = 3;
         n = row_current;
         if (n <= 1){
-          o = nums[row_current] / 100;
+          o = nums[row_current] / trainmod;
           i2csend();
-          nums[row_current] = p * 100;
+          nums[row_current] = p * trainmod;
         }
         else{
           o = nums[row_current];
@@ -531,13 +550,13 @@ void i2csync(void){
     // buffer
     n = i;
     if (i <= 1){
-      o = nums[i] / 100;
+      o = nums[i] / trainmod;
       
       // Transmit
       i2csend();
 
       // Change the number back
-      nums[i] = p * 100;
+      nums[i] = p * trainmod;
     }
     else{
       o = nums[i];
@@ -603,6 +622,22 @@ void setup() {
   }
   while (p != o){
     // make sure arm is done right
+    i2csend();
+  }
+
+  // train modifier
+  if (finemode){
+    trainmod = trainmod2; // Fine
+  }
+  else{
+    trainmod = trainmod1; // Coarse
+  }
+  // Communicate modifier
+  m = 13;
+  o = trainmod;
+  p = 0;
+  while (p != o){
+    // make sure communication is done right
     i2csend();
   }
   

@@ -26,6 +26,9 @@ unsigned int nums[num_items] = {200, 500, 5, 0, 0, 5};
 unsigned int numsrem[num_items]; // [Pulse width, Pulse cycle, N pulses, PWM, Polarity, refractory]
 byte numsi2c[num_items]; // i2c only, in bytes
 
+// Train time modifier (10 means 10 ms - 2550 ms range, 100 means 100-25500 ms range)
+byte traintimemod = 10;
+
 // I2c
 int m, n, o; // receive
 
@@ -140,7 +143,7 @@ void receiveEvent(int howMany){
       // Change single value
       if (n <= 1){
         // convert
-        nums[n] = o * 100;
+        nums[n] = o * traintimemod;
       }
       else if (n == 3){
         nums[n] = o;
@@ -187,6 +190,11 @@ void receiveEvent(int howMany){
         softarm = false;
       }
       break;
+
+    case 13:
+      // change time modifier
+      traintimemod = o;
+      break;
   }
 }
 
@@ -207,7 +215,7 @@ void requestEvent() {
     case 3:
       // Change single value
       if (n <= 1){
-        Wire.write(nums[n]/100);
+        Wire.write(nums[n]/traintimemod);
       }
       else{
         Wire.write(nums[n]);
@@ -217,7 +225,7 @@ void requestEvent() {
     case 4:
       // ping single value in the running nums
       if (n <= 1){
-        Wire.write(numsrem[n]/100);
+        Wire.write(numsrem[n]/traintimemod);
       }
       else{
         Wire.write(numsrem[n]);
@@ -227,7 +235,7 @@ void requestEvent() {
     case 5:
       // ping single value
       if (n <= 1){
-        Wire.write(nums[n]/100);
+        Wire.write(nums[n]/traintimemod);
       }
       else{
         Wire.write(nums[n]);
@@ -238,7 +246,7 @@ void requestEvent() {
       // ping entire array
       for (i = 0; i < num_items; i++){
         if (i <= 1){
-          numsi2c[i] = nums[i] / 100;
+          numsi2c[i] = nums[i] / traintimemod;
         }
         else{
           numsi2c[i] = nums[i];
@@ -284,6 +292,11 @@ void requestEvent() {
       break;
 
     case 12:
+      // soft unarm
+      Wire.write(o);
+      break;
+
+    case 13:
       // soft unarm
       Wire.write(o);
       break;
