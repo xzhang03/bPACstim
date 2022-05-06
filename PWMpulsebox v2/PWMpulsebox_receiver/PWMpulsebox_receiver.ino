@@ -1,12 +1,25 @@
 #include <Wire.h>
 
+#define PCB true // PCB mode uses itsy bitsy 32u4 5v
+
+
 // const byte TriggerPin = 11;
-const byte ArmPin = 12;
-const byte LEDArm = 11;
-const byte LEDPIN1 = 5; // Pin 5: PWM
-const byte LEDPIN2 = 6; // Pin 6: digital
-const byte LEDPIN3 = 8; // Pin 8: digital unsigned
-const byte LEDonboard = 13; // onboard LED to show when Stim is on
+#if PCB
+  const byte ArmPin = 7;
+  const byte LEDArm = 8;
+  const byte LEDPIN1 = 5; // Pin 5: PWM
+  const byte LEDPIN2 = 9; // Pin 6: digital
+  const byte LEDPIN3 = 10; // Pin 8: digital unsigned
+  const byte LEDonboard = 13; // onboard LED to show when Stim is on
+#else
+  
+  const byte ArmPin = 12;
+  const byte LEDArm = 11;
+  const byte LEDPIN1 = 5; // Pin 5: PWM
+  const byte LEDPIN2 = 6; // Pin 6: digital
+  const byte LEDPIN3 = 8; // Pin 8: digital unsigned
+  const byte LEDonboard = 13; // onboard LED to show when Stim is on
+#endif
 
 // PWM
 int pwm = 205; //0 - 385,  250 - 12, 100 - 250, 150 - 185, 200 - 100, 210 - 80, 205 81, 
@@ -52,12 +65,13 @@ byte trainon2_ch = 3;
 void setup() {
   // put your setup code here, to run once:
   // pinMode(TriggerPin, INPUT); 
-  pinMode(ArmPin, INPUT_PULLUP); 
+  pinMode(ArmPin, INPUT); 
   pinMode(LEDArm, OUTPUT);
   pinMode(LEDPIN1, OUTPUT);
   pinMode(LEDPIN2, OUTPUT);
   pinMode(LEDPIN3, OUTPUT);
   pinMode(trainon2_ch, OUTPUT);
+  pinMode(LEDonboard, OUTPUT);
 
   Wire.begin(4);                // join i2c bus with address #4
   Wire.onReceive(receiveEvent); // register event
@@ -75,12 +89,12 @@ void loop() {
   // Arming
   if ((digitalRead(ArmPin) == LOW) || softarm){
     arm = true;
-    analogWrite(LEDArm,50);
+    digitalWrite(LEDArm, HIGH);
   }
   else{
     arm = false;
     trainon = false;
-    analogWrite(LEDArm,0);
+    digitalWrite(LEDArm, LOW);
 
     // Halt and catch fire
     if (pulseon){
