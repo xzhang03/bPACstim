@@ -33,8 +33,8 @@ void i2carm(void){
 }
 
 // Train function
-// [        0,        1,        2,        3,           4,        5]
-// [LED width, LED freq, N pulses, Ext trig, Train cycle, N trains]
+// [        0,        1,        2,    3,           4,        5]
+// [LED width, LED freq, N pulses, PWM, Train cycle, N trains]
 void dotrain(void){
   tnowtrain = tnow - t0train;
 

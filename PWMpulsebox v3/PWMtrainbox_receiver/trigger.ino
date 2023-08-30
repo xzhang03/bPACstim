@@ -23,7 +23,7 @@ void check_arm(void){
 
 void check_trigin_en(void){
   byte ledbright = 30;
-  if (!digitalRead(FPin_en)){
+  if (digitalRead(FPin_en)){
     // Trigger in enabled
     input_en = true;
     analogWrite(FPin_enled, ledbright);

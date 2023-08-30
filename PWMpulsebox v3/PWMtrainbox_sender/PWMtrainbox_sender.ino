@@ -62,8 +62,8 @@ U8GLIB_NHD_C12864 u8g(13, 11, 10, 9, 8);    // SPI Com: SCK = 13, MOSI = 11, CS 
 #define MENU_ITEMS 7
 #define num_items 6
 
-const char *menu_strings[MENU_ITEMS] = { "LED width (ms)", "Pulse freq (hz)", "Pulses", "Ext trig", "Train cycle (s)", "N trains", "Unused"};
-const char *trainon_strings[MENU_ITEMS] = { "LED width (ms)", "Pulse freq (hz)", "Pulses left", "Ext trig", "Train cycle (s)", "Trains left", "*TRAIN IS GOING*"};
+const char *menu_strings[MENU_ITEMS] = { "LED width (ms)", "Pulse freq (hz)", "Pulses", "PWM", "Train cycle (s)", "N trains", "Unused"};
+const char *trainon_strings[MENU_ITEMS] = { "LED width (ms)", "Pulse freq (hz)", "Pulses left", "PWM", "Train cycle (s)", "Trains left", "*TRAIN IS GOING*"};
 byte row_current = 0;
 bool column_select = false; // true = right side, false = left side
 bool menu_redraw_required = false;
@@ -71,8 +71,8 @@ byte last_key_code = KEY_NONE;
 byte i; // indexing
 
 // Train settings
-// [        0,        1,        2,        3,           4,        5]
-// [LED width, LED freq, N pulses, Ext trig, Train cycle, N trains]
+// [        0,        1,        2,   3,           4,        5]
+// [LED width, LED freq, N pulses, PWM, Train cycle, N trains]
 uint32_t nums[num_items]; // Current value (set in receiver, {10, 10, 10, 0, 10, 1})
 const uint32_t numdiffs[num_items] = {10, 5, 10, 20, 10, 5}; // intermediate
 const uint32_t numdiffs2[num_items] = {0, 0, 0, 5, 0, 0}; // large (0 means capping)
