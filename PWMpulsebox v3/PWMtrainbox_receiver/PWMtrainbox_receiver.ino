@@ -2,6 +2,24 @@
 #define debug false
 #define i2cadd 4
 
+// ==================================================
+// Modes: pick 1 from the 3 below
+// In passive mode, each trig in pulse triggers an LED pulse whose duration is defined by the trigin pulse
+// Otherwise, each trig in pulse triggers a train
+// This is active high
+#define passivemode false
+bool passiveon = false;
+
+// In automode, device generates its own train, or each trig in pulse would trigger a train
+#define autonomousmode true
+
+// In semiautomode, device generates its own train, but each LED and blank pulse only comes out when a frame pulse is in
+#define semiautomode false
+#define trigin_activehigh true
+bool semiautoarm = false;
+
+// ==================================================
+
 // Arm
 const byte ArmPin = 7;
 const byte ArmLED = 11;
@@ -55,7 +73,7 @@ uint32_t blank_gap = 2000; // 2 ms time to let led drop off
 uint32_t blankwidth = 12000;
 
 // Step size
-uint32_t stepsz = 200;
+//uint32_t stepsz = 200;
 
 void setup() {
   // put your setup code here, to run once:
@@ -105,10 +123,17 @@ void loop() {
   check_trigin_en();
   
   // Check interrupt
-  check_trigin();
+  #if passivemode
+    // Each input pulse triggers an LED pulse
+    check_trigin_passive();
+  #else if autonomousmode
+    // Each input pulse triggers a train
+    check_trigin();
+  #endif
+  
   
   // Train
   dotrain();
 
-  delayMicroseconds(stepsz);
+//  delayMicroseconds(stepsz);
 }

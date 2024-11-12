@@ -119,6 +119,7 @@ void updateMenu(void) {
   last_key_code = uiKeyCode;
   
   switch ( uiKeyCode ) {
+    // ======================================== DOWN ========================================
     case KEY_DOWN:
       if (!column_select){
                 
@@ -167,7 +168,8 @@ void updateMenu(void) {
       // Serial.println(row_current);
       menu_redraw_required = true;
       break;
-      
+
+    // ======================================== UP ========================================
     case KEY_UP:
       if (!column_select){
         // Going up and down menu
@@ -189,8 +191,16 @@ void updateMenu(void) {
         else{
           // if number >= thresh go up as numdiffs2 (large)
           nums[row_current] = nums[row_current] + numdiffs2[row_current];
+
         }
 
+        // Check to make sure PWM does not go above 255
+        if (row_current == 3){
+          if(nums[row_current] > 255){
+              nums[row_current] = 255;
+          }
+        }
+        
         // i2c
         m = 3;
         n = row_current;
@@ -213,7 +223,8 @@ void updateMenu(void) {
       // Serial.println(row_current);
       menu_redraw_required = true;
       break;
-      
+
+    // ======================================== SELECT ========================================
     case KEY_SELECT:
       if (column_select){
         // Going up and down menu
@@ -223,37 +234,42 @@ void updateMenu(void) {
         }        
       }
       else if (row_current == MENU_ITEMS - 1){
-        startbuttoncurrenttime = tnow;
-        // First time start button down
-        if (!startbuttondown){
-          startbuttondowntime = startbuttoncurrenttime;
-          startbuttondown = true;
-
-          // Last min menu sync
-//          i2csync();
+        if (!input_en){
+          // Push button engage only works if not listening
           
-        }
-        else if ((startbuttoncurrenttime - startbuttondowntime > startbuttonhold) && !trainon && arm){
-          // ui start
-          for( i = 0; i < num_items; i++ ) {
-            numsrem[i] = nums[i]; // [LED width, Blank width, N pulses, Freq. Mod, Train cycle,   N trains]
+          startbuttoncurrenttime = tnow;
+          // First time start button down
+          if (!startbuttondown){
+            startbuttondowntime = startbuttoncurrenttime;
+            startbuttondown = true;
+  
+            // Last min menu sync
+  //          i2csync();
+            
           }
-          
-          // i2c start
-          m = 1;
-          n = 0;
-          o = 0;
-          i2csend();
-          if (p == 255){
-            refractory = nums[5] * 1000;
-            trainon = true;
-            t0train = tnow;
+          else if ((startbuttoncurrenttime - startbuttondowntime > startbuttonhold) && !trainon && arm){
+            // ui start
+            for( i = 0; i < num_items; i++ ) {
+              numsrem[i] = nums[i]; // [LED width, Blank width, N pulses, Freq. Mod, Train cycle,   N trains]
+            }
+            
+            // i2c start
+            m = 1;
+            n = 0;
+            o = 0;
+            i2csend();
+            if (p == 255){
+              refractory = nums[5] * 1000;
+              trainon = true;
+              t0train = tnow;
+            }
           }
         }
       }
       menu_redraw_required = true;
       break;
-      
+
+    // ======================================== LEFT ========================================
     case KEY_LEFT:
       if (row_current < num_items){
         column_select = !column_select;
@@ -261,7 +277,8 @@ void updateMenu(void) {
       }
       // Serial.println(row_current);
       break;
-      
+
+    // ======================================== RIGHT ========================================
     case KEY_RIGHT:
       if (row_current < num_items){
         column_select = !column_select;
@@ -269,7 +286,8 @@ void updateMenu(void) {
       }
       // Serial.println(row_current);
       break;
-    
+
+    // ======================================== NONE ========================================
     case KEY_NONE:
       if (startbuttondown){
         startbuttondown = false;
@@ -281,8 +299,22 @@ void updateMenu(void) {
 
 void initialdraw(void) {
   byte h;
-  const char *s[5] = { "PWM TRAIN v3.0", "By Stephen Zhang", "SDA pin - A4", "SCL Pin - A5"};
+  const char *s[5] = { "PWM TRAIN v3.0", "By Stephen Zhang", "Unknown mode", "SDA A4 | SCL A5"};
   char buf[4];
+
+  // Get modes
+  switch (receivermode){
+    case 0:
+      s[2] = "Autonomous mode";
+      break;
+    case 1:
+      s[2] = "Semiauto mode";
+      break;
+    case 2:
+      s[2] = "Passive mode";
+      break;
+  }
+  
   u8g_uint_t w, d, w2;
 
   u8g.setFont(u8g_font_6x12);

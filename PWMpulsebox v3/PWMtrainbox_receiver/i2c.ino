@@ -185,7 +185,18 @@ void requestEvent() {
       // Mods
       Wire.write(o);
       break;
-      
+
+    case 14:
+      #if autonomousmode
+        Wire.write(0);
+      #endif
+      #if semiautomode
+        Wire.write(1);
+      #endif 
+      #if passivemode
+        Wire.write(2);
+      #endif
+      break;
     
   }
   // reset m;

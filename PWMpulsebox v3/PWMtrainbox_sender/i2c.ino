@@ -164,3 +164,11 @@ void sendalwaysarm(void){
   // Transmit
   i2csend();
 }
+
+void checkmode(void){
+  m = 14;
+  n = 0;
+  o = 0;
+  i2csend();
+  receivermode = p;
+}

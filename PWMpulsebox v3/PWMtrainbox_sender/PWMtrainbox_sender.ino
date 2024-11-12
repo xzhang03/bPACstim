@@ -117,12 +117,18 @@ byte i2csendbuf[3]; //
 bool sendi2c = false;
 bool synci2c = false;
 
+// Receiver mode
+uint8_t receivermode = 0; // 0 - autonomous, 1 - semiauto, 2 - passive
+
 void setup() {
   Wire.begin(); // join i2c bus (address optional for master)
 
   // i2c initialize
 //  i2csync();
   i2csync_back();
+
+  // i2c get receiver mode
+  checkmode();
   
   #if (debug || debugcheckcycle)
     Serial.begin(9600);
@@ -182,6 +188,23 @@ void loop() {
       Serial.print(tdebug2); 
       Serial.print(" bytes in i2c buffer: "); 
       Serial.println(Wire.available());
+
+      receivermode = checkmode();
+      Serial.print(receivermode);
+      switch (receivermode ){
+        case 0:
+          Serial.println(" Autonomous mode.");
+          break;
+        case 1:
+          Serial.println(" Semiauto mode.");
+          break;
+        case 2:
+          Serial.println(" Passive mode.");
+          break;
+        default:
+          Serial.println(" Unknown mode.");
+          break;
+      }
     }
   #endif
   

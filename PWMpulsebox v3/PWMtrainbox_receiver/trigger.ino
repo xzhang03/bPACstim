@@ -43,3 +43,27 @@ void check_trigin(void){
     }
   }
 }
+
+void check_trigin_passive(void){
+  // Type
+  byte LED_power = nums[3];
+  
+
+  if (!passiveon){
+    if (input_en && arm && (digitalRead(FPin) == 1)){
+      analogWrite(LEDPIN1, LED_power);
+      digitalWrite(TrigPin, HIGH);
+      digitalWrite(onboardLED, HIGH);
+      passiveon = true;
+    }
+  }
+  else if (passiveon){
+    if (!input_en || !arm || digitalRead(FPin) == 0){
+      analogWrite(LEDPIN1, 255);
+      digitalWrite(TrigPin, LOW);
+      digitalWrite(onboardLED, LOW);
+      passiveon = false;
+    }
+  }
+  
+}

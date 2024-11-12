@@ -20,9 +20,28 @@ void dotrain(void){
 
   // Turn on pulse (internal and external)
   if ((!pulseon) && (arm) && (numsrem[2] > 0) && ((tnow - t0) >= ledcycle)){
-    // Turn on pulses immediatedly
-    turnpulseon();
+    #if autonomousmode
+      // Turn on pulses immediatedly
+      turnpulseon();
+    #endif
+    #if passivemode
+      // Turn on pulses immediatedly
+      turnpulseon();
+    #endif
+    #if semiautomode
+      // Wait for frame pulse
+      semiautoarm = true;
+    #endif
+    
   }
+
+  // Semiautomode: pulse when frame pulse is on
+  #if semiautomode
+    if (semiautoarm && (digitalRead(FPin) == trigin_activehigh)){
+      turnpulseon();
+      semiautoarm = false;
+    }
+  #endif
 
   // Refill pulses (internal only here)
   if ((numsrem[2] == 0) && (numsrem[5] > 0) && trainon){

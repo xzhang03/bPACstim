@@ -11,4 +11,5 @@
  * 9.  Ping 42
  * 10. Change always arm
  * 13. Change mods
+ * 14. Check modes (0 - auto, 1 - semiauto, 2 - passive)
  */
