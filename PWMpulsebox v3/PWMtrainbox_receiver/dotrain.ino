@@ -29,10 +29,15 @@ void dotrain(void){
       turnpulseon();
     #endif
     #if semiautomode
-      // Wait for frame pulse
-      semiautoarm = true;
+      if (input_en){
+        // Listening mode
+        // Wait for frame pulse
+        semiautoarm = true;
+      }
+      else{
+        turnpulseon();
+      }
     #endif
-    
   }
 
   // Semiautomode: pulse when frame pulse is on

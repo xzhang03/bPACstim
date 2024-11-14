@@ -42,7 +42,7 @@ void drawMenu(void) {
         }
         else if (!arm && input_en){
           // Input enable but not arm
-          u8g.drawStr(1, i*h, "[LISTENING Unarmed]");
+          u8g.drawStr(1, i*h, "[LISTENING UNARMED]");
         }
         else if (arm && input_en){
           // Input enable but not arm
@@ -234,8 +234,9 @@ void updateMenu(void) {
         }        
       }
       else if (row_current == MENU_ITEMS - 1){
-        if (!input_en){
+        if (!input_en || (receivermode == 1)){
           // Push button engage only works if not listening
+          // Also works if it's semiauto mode
           
           startbuttoncurrenttime = tnow;
           // First time start button down

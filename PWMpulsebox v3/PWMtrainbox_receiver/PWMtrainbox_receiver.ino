@@ -11,10 +11,10 @@
 bool passiveon = false;
 
 // In automode, device generates its own train, or each trig in pulse would trigger a train
-#define autonomousmode true
+#define autonomousmode false
 
 // In semiautomode, device generates its own train, but each LED and blank pulse only comes out when a frame pulse is in
-#define semiautomode false
+#define semiautomode true
 #define trigin_activehigh true
 bool semiautoarm = false;
 
@@ -126,7 +126,8 @@ void loop() {
   #if passivemode
     // Each input pulse triggers an LED pulse
     check_trigin_passive();
-  #else if autonomousmode
+  #endif 
+  #if autonomousmode
     // Each input pulse triggers a train
     check_trigin();
   #endif
