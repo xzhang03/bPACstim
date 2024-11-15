@@ -7,14 +7,14 @@
 // In passive mode, each trig in pulse triggers an LED pulse whose duration is defined by the trigin pulse
 // Otherwise, each trig in pulse triggers a train
 // This is active high
-#define passivemode false
+#define passivemode true
 bool passiveon = false;
 
 // In automode, device generates its own train, or each trig in pulse would trigger a train
 #define autonomousmode false
 
 // In semiautomode, device generates its own train, but each LED and blank pulse only comes out when a frame pulse is in
-#define semiautomode true
+#define semiautomode false
 #define trigin_activehigh true
 bool semiautoarm = false;
 
@@ -43,8 +43,8 @@ bool input_en = false;
 // [        0,        1,        2,   3,           4,        5]
 // [LED width, LED freq, N pulses, PWM, Train cycle, N trains]
 #define num_items 6
-unsigned int nums[num_items] = {10, 20, 40, 100, 10, 1}; 
-unsigned int numsrem[num_items] = {10, 10, 0, 100, 10, 1}; // [LED width, LED freq, N pulses, Ext trig, Train cycle, N trains]
+unsigned int nums[num_items] = {8, 20, 40, 100, 10, 1}; 
+unsigned int numsrem[num_items] = {8, 10, 0, 100, 10, 1}; // [LED width, LED freq, N pulses, Ext trig, Train cycle, N trains]
 byte numsi2c[num_items]; // i2c only, in bytes
 
 
@@ -70,7 +70,7 @@ bool trainon = false;
 // Blank
 bool blankon = false;
 uint32_t blank_gap = 2000; // 2 ms time to let led drop off
-uint32_t blankwidth = 12000;
+uint32_t blankwidth = 10000;
 
 // Step size
 //uint32_t stepsz = 200;
